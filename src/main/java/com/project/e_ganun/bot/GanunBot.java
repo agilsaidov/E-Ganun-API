@@ -27,7 +27,10 @@ public class GanunBot extends TelegramLongPollingBot {
 
             if(messageText.equals("/start")){
                 sendWelcomeMessage(chatId);
-            }else{
+            }if(messageText.equals("/haqqında") || messageText.equals("/haqqinda") || messageText.equals("/about")){
+                sendAboutMessage(chatId);
+            }
+            else{
                 searchGanun(chatId, messageText);
             }
         }
@@ -47,10 +50,20 @@ public class GanunBot extends TelegramLongPollingBot {
     //Helper Methods
 
     private void sendWelcomeMessage(Long chatId) {
-        String welcome = "🇦🇿 E-Qanun botuna xoş gəlmisiniz!\n" +
+        String welcome = "🇦🇿 E-Ganun botuna xoş gəlmisiniz!\n" +
                 "Qanun nömrəsini daxil edin (məs: 241)";
         sendMessage(chatId, welcome);
     }
+
+    private void sendAboutMessage(Long chatId) {
+        String about =
+                "ℹ️ *E-Ganun Botu*\n\n" +
+                        "E-Ganun botu Azərbaycan Respublikası qanunvericiliyinə dair məlumatları rəsmi mənbələr əsasında təqdim etmək məqsədilə hazırlanmış köməkçi botdur.\n\n" +
+                        "❗ *Qeyd:*\n" +
+                        "Bot rəsmi hüquqi mənbə hesab edilmir. Məlumatlar əsasən rəsmi mənbələrə söykənsə də, mümkün texniki vəya məzmun xətalarına görə bot və onun yaradıcısı heç bir məsuliyyət daşımır.";
+        sendMessage(chatId, about);
+    }
+
 
     private void searchGanun(Long chatId, String ganunNo) {
         List<Ganun> results = ganunService.searchByGanunNo(ganunNo);
@@ -66,11 +79,11 @@ public class GanunBot extends TelegramLongPollingBot {
 
     private String formatResults(List<Ganun> ganuns) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\uD83D\uDCDC Tapılan qanunlar:\\n\\n");
+        sb.append("\uD83D\uDCDC Tapılan qanunlar:\n\n");
 
         for (Ganun ganun : ganuns) {
-            sb.append("🔹 Qanun ").append(ganun.getGanunNo()).append("\n");
-            sb.append(ganun.getGanunText()).append("\n\n");
+            sb.append("🔹 Maddə ").append(ganun.getGanunNo()).append("\n\n");
+            sb.append(ganun.getGanunText()).append("\n");
             sb.append("─────────────────\n\n");
         }
         System.out.println(sb.toString());

@@ -25,7 +25,7 @@ public class JsonToSQLConverter {
 
         while (fields.hasNext()) {
             Map.Entry<String, JsonNode> entry = fields.next();
-            String key = entry.getKey();
+            String key = entry.getKey() + ".";
             String value = entry.getValue().asText();
 
             ps.setString(1, key);
