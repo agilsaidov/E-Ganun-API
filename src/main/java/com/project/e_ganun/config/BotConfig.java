@@ -1,13 +1,15 @@
 package com.project.e_ganun.config;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "bot")
 @Data
 public class BotConfig {
+    @Value("${bot.username}")
     private String username;
+
+    @Value("${bot.token}")
     private String token;
 }

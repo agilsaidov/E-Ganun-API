@@ -8,7 +8,7 @@ import lombok.*;
 
     @Data
     @Entity
-    @Table(name = "ganun")
+    @Table(name = "ganun", schema = "ganun")
     public class Ganun {
         @Id
         @Column(name = "ganun_no")
