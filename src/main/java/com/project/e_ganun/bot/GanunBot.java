@@ -2,14 +2,18 @@ package com.project.e_ganun.bot;
 
 import com.project.e_ganun.config.BotConfig;
 import com.project.e_ganun.model.Ganun;
+import com.project.e_ganun.service.BotUserService;
 import com.project.e_ganun.service.GanunService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component
@@ -18,19 +22,27 @@ public class GanunBot extends TelegramLongPollingBot {
 
     private final BotConfig botConfig;
     private final GanunService ganunService;
+    private final BotUserService botUserService;
 
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage() && update.getMessage().hasText()) {
             String messageText = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
+            User user = update.getMessage().getFrom();
 
             if(messageText.equals("/start")){
                 sendWelcomeMessage(chatId);
-            }if(messageText.equals("/haqqında") || messageText.equals("/haqqinda") || messageText.equals("/about")){
+                botUserService.registerOrUpdateUSer(user);
+            }
+            else if(messageText.equals("/haqqında") || messageText.equals("/haqqinda") || messageText.equals("/about")){
                 sendAboutMessage(chatId);
             }
+            else if(messageText.equals("/stats")){
+                sendUserStats(chatId, user.getId());
+            }
             else{
+                botUserService.trackSearch(user.getId(), messageText);
                 searchGanun(chatId, messageText);
             }
         }
@@ -51,8 +63,27 @@ public class GanunBot extends TelegramLongPollingBot {
 
     private void sendWelcomeMessage(Long chatId) {
         String welcome = "🇦🇿 E-Ganun botuna xoş gəlmisiniz!\n" +
-                "Qanun nömrəsini daxil edin (məs: 241)";
+                "\uD83D\uDCDC Maddələr üçün nömrə daxil edin (məs: 241)\n" +
+                "📊 Statistikanız üçün /stats\n" +
+                "❓ Bot haqqında məlumat /haqqinda";
         sendMessage(chatId, welcome);
+    }
+
+    private void sendUserStats(Long chatId, Long telegramId) {
+        var usage = botUserService.getUserUsage(telegramId);
+
+        if (usage == null) {
+            sendMessage(chatId, "❗Statistika tapılmadı");
+            return;
+        }
+
+        String stats = "📊 Sizin statistikanız:\n\n" +
+                "🔍 Axtarışlar: " + usage.getTotalSearches() + "\n" +
+                "💬 Mesajlar: " + usage.getTotalMessages() + "\n" +
+                "📅 İlk istifadə: " + formatDate(usage.getFirstUsageDate()) + "\n" +
+                "🕐 Son axtarış: " + formatDate(usage.getLastSearchDate());
+
+        sendMessage(chatId, stats);
     }
 
     private void sendAboutMessage(Long chatId) {
@@ -100,5 +131,12 @@ public class GanunBot extends TelegramLongPollingBot {
             sendMessage(chatId, "❌ Xəta");
             e.printStackTrace();
         }
+    }
+
+    private String formatDate(LocalDateTime dateTime) {
+        if (dateTime == null) return "Yoxdur";
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+        return dateTime.format(formatter);
     }
 }
