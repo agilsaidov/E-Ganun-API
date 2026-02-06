@@ -86,7 +86,6 @@ public class GanunBot extends TelegramLongPollingBot {
             sb.append(ganun.getGanunText()).append("\n");
             sb.append("─────────────────\n\n");
         }
-        System.out.println(sb.toString());
         return sb.toString();
     }
 
