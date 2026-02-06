@@ -2,6 +2,7 @@ package com.project.e_ganun.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @Table(name = "users", schema = "ganun")
 @NoArgsConstructor @AllArgsConstructor
+@Builder
 public class BotUser {
     @Id
     @Column(name = "telegram_id")
